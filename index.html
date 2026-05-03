@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi Rifa">
+<meta name="theme-color" content="#0a0a0f">
+<title>Mi Rifa</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;
+  --border:rgba(255,255,255,0.08);--accent:#00d4ff;--accent2:#7c3aed;
+  --gold:#f59e0b;--green:#10b981;--red:#ef4444;--amber:#f59e0b;
+  --text:#f0f0f5;--muted:#6b7280;
+  --sold-bg:rgba(16,185,129,0.12);--sold-border:rgba(16,185,129,0.3);--sold-txt:#10b981;
+  --res-bg:rgba(245,158,11,0.12);--res-border:rgba(245,158,11,0.3);--res-txt:#f59e0b;
+  --r:14px;--r-sm:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
+.screen{display:none;flex-direction:column;height:100vh;height:100dvh}
+.screen.active{display:flex}
+.topbar{background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-top:max(14px,env(safe-area-inset-top))}
+.topbar h1{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;flex:1;letter-spacing:-.3px}
+.back-btn{color:var(--accent);font-size:15px;cursor:pointer;font-weight:500;white-space:nowrap}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 100px}
+.tabbar{background:rgba(10,10,15,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:grid;padding-bottom:max(8px,env(safe-area-inset-bottom));flex-shrink:0}
+.ti{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px;cursor:pointer;gap:2px}
+.ti svg{width:20px;height:20px;stroke:var(--muted);transition:stroke .15s}
+.ti span{font-size:9px;color:var(--muted);font-weight:500;letter-spacing:.2px;transition:color .15s}
+.ti.on svg{stroke:var(--accent)}.ti.on span{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.card-body{padding:14px}
+.hero{border-radius:var(--r);margin-bottom:10px;overflow:hidden;position:relative;background:var(--surface2);border:1px solid var(--border);min-height:160px}
+.hero-img{width:100%;height:160px;object-fit:cover;display:block}
+.hero-placeholder{width:100%;height:160px;background:linear-gradient(135deg,#1c1c26 0%,#0a0a0f 100%);display:flex;align-items:center;justify-content:center;font-size:48px}
+.hero-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(10,10,15,.95) 0%,transparent 100%);padding:40px 16px 16px}
+.hero-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-weight:600;margin-bottom:4px}
+.hero-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;line-height:1.2}
+.hero-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:3px}
+.hero-badges{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.hbadge{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.25);color:var(--accent);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 8px;text-align:center}
+.stat-n{font-size:22px;font-weight:700;font-family:'DM Mono',monospace}
+.stat-l{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.num-grid{display:grid;gap:4px;margin-bottom:10px}
+.nb{aspect-ratio:1;border-radius:6px;border:1px solid var(--border);font-size:11px;font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--muted);transition:transform .1s,background .1s,border-color .1s;min-height:30px;user-select:none;-webkit-user-select:none}
+.nb.sold{background:var(--sold-bg);color:var(--sold-txt);border-color:var(--sold-border);cursor:not-allowed}
+.nb.reserved{background:var(--res-bg);color:var(--res-txt);border-color:var(--res-border);cursor:not-allowed}
+.nb.sel{background:var(--accent);color:#000;border-color:var(--accent);transform:scale(1.12);box-shadow:0 0 12px rgba(0,212,255,.4);font-weight:700}
+.nb.sold-admin{cursor:pointer}.nb.reserved-admin{cursor:pointer}
+.nb:active:not(.sold):not(.reserved){transform:scale(.9)}
+.legend{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.ldot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.selbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+.selbar.on{color:var(--accent);font-weight:500;background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.25)}
+.btn{width:100%;padding:14px;background:var(--accent);color:#000;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.2px;transition:transform .1s,opacity .15s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent);width:100%;padding:12px;border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;margin-top:8px;transition:background .15s}
+.btn-ghost:active{background:rgba(0,212,255,.08)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#000}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-sm.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.fg{margin-bottom:12px}
+.fl{font-size:12px;color:var(--muted);margin-bottom:4px;display:block;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:15px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;transition:border-color .15s;-webkit-appearance:none}
+.fi:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,255,.12)}
+.fi::placeholder{color:#3a3a4a}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ocard{background:var(--surface2);border-radius:var(--r-sm);padding:13px;margin-bottom:13px;border:1px solid var(--border)}
+.orow{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--text)}
+.orow span:first-child{color:var(--muted)}
+.otot{font-size:16px;font-weight:700;border-top:1px solid var(--border);margin-top:8px;padding-top:10px}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.po{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:13px 10px;cursor:pointer;text-align:center;background:var(--surface);transition:all .15s}
+.po.sel{border-color:var(--accent);background:rgba(0,212,255,.08)}
+.po-icon{font-size:24px;display:block;margin-bottom:4px}
+.po-name{font-size:13px;font-weight:600;color:var(--text)}
+.po-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.ib{border-radius:var(--r-sm);padding:12px;margin-bottom:12px;font-size:13px;line-height:1.5}
+.ib-blue{background:rgba(0,212,255,.08);color:#7dd3fc;border:1px solid rgba(0,212,255,.2)}
+.ib-amber{background:rgba(245,158,11,.08);color:#fcd34d;border:1px solid rgba(245,158,11,.2)}
+.ib-green{background:rgba(16,185,129,.08);color:#6ee7b7;border:1px solid rgba(16,185,129,.2)}
+.ib-red{background:rgba(239,68,68,.08);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
+.ticket{border:2px dashed rgba(0,212,255,.3);border-radius:var(--r);padding:22px;text-align:center;margin:14px 0;background:rgba(0,212,255,.04);position:relative;overflow:hidden}
+.ticket::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(0,212,255,.06);border-radius:50%}
+.ticket-n{font-size:60px;font-weight:800;color:var(--accent);font-family:'Syne',sans-serif;line-height:1}
+.ticket-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+.ticket-name{font-size:15px;font-weight:600;margin-top:6px}
+.vbadge{display:inline-flex;align-items:center;gap:4px;background:var(--sold-bg);color:var(--sold-txt);border:1px solid var(--sold-border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;margin-top:10px}
+.seg{display:flex;background:var(--surface2);border-radius:8px;padding:2px;margin-bottom:12px;border:1px solid var(--border)}
+.seg-btn{flex:1;padding:7px 4px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap}
+.seg-btn.on{background:var(--accent);color:#000;font-weight:700}
+.bc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;cursor:pointer}
+.bc-num{font-size:22px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace}
+.bc-name{font-size:14px;font-weight:500;margin-top:2px}
+.bc-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.sp{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.sp-green{background:var(--sold-bg);color:var(--sold-txt);border:1px solid var(--sold-border)}
+.sp-amber{background:var(--res-bg);color:var(--res-txt);border:1px solid var(--res-border)}
+.stat-big{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:10px}
+.stat-big-n{font-size:48px;font-weight:800;font-family:'Syne',sans-serif}
+.progress-bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin:6px 0}
+.progress-fill{height:100%;border-radius:4px;transition:width .6s ease;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.slbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 8px}
+.modal-wrap{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:flex-end}
+.modal-wrap.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-height:90vh;overflow-y:auto;border-top:1px solid var(--border)}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px}
+.sorteo-drum{background:var(--surface2);border:2px solid var(--accent);border-radius:var(--r);padding:30px;text-align:center;margin-bottom:14px}
+.drum-num{font-size:56px;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent);letter-spacing:-2px;min-height:72px;line-height:1}
+.drum-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+.img-upload-area{border:2px dashed var(--border);border-radius:var(--r-sm);padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;margin-bottom:12px}
+.img-upload-area:hover{border-color:var(--accent)}
+.img-preview-cfg{width:100%;height:140px;object-fit:cover;border-radius:var(--r-sm);display:none;margin-bottom:8px}
+/* Comprador — solo 1 tab */
+.buyer-tabbar{grid-template-columns:1fr!important}
+@media print{
+  body{background:#fff!important;color:#000!important}
+  .no-print{display:none!important}
+  .print-area{display:block!important;page-break-inside:avoid}
+  .print-ticket{border:2px solid #000;border-radius:8px;padding:16px;margin:8px;display:inline-block;width:calc(50% - 20px);vertical-align:top;font-family:'DM Mono',monospace;page-break-inside:avoid}
+  .print-ticket-num{font-size:36px;font-weight:700;text-align:center}
+  .print-ticket-info{font-size:11px;margin-top:6px}
+  .print-ticket-divider{border-top:1px dashed #ccc;margin:8px 0}
+}
+.print-area{display:none}
+</style>
+</head>
+<body>
+
+<!-- ══════ BUYER: HOME ══════ -->
+<div id="sc-buy-home" class="screen">
+  <div class="topbar">
+    <h1 id="bh-title">🎟️ Mi Rifa</h1>
+  </div>
+  <div class="scroll">
+    <div class="hero">
+      <div class="hero-placeholder" id="bh-placeholder">🏆</div>
+      <img id="bh-img" class="hero-img" style="display:none" src="" alt="Premio">
+      <div class="hero-overlay">
+        <div class="hero-eyebrow">Sorteo activo</div>
+        <div class="hero-title" id="bh-prize">Cargando...</div>
+        <div class="hero-sub" id="bh-meta"></div>
+        <div class="hero-badges">
+          <span class="hbadge" id="bh-price">—</span>
+          <span class="hbadge" id="bh-range">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-n" id="bst-a" style="color:var(--accent)">—</div><div class="stat-l">Por vender</div></div>
+      <div class="stat-box"><div class="stat-n" id="bst-s" style="color:var(--green)">—</div><div class="stat-l">Vendidos</div></div>
+      <div class="stat-box"><div class="stat-n" id="bst-r" style="color:var(--amber)">—</div><div class="stat-l">Reservados</div></div>
+    </div>
+    <div class="legend">
+      <div class="li"><div class="ldot" style="background:var(--sold-bg);border:1px solid var(--sold-border)"></div>Vendido</div>
+      <div class="li"><div class="ldot" style="background:var(--res-bg);border:1px solid var(--res-border)"></div>Reservado</div>
+      <div class="li"><div class="ldot" style="background:var(--surface);border:1px solid var(--border)"></div>Libre</div>
+    </div>
+    <div class="num-grid" id="buy-grid"></div>
+    <div class="selbar" id="buy-selbar">Tocá un número para seleccionarlo</div>
+    <button class="btn" id="buy-btn" style="display:none" onclick="buyerGoCheckout()">Comprar este número →</button>
+  </div>
+</div>
+
+<!-- ══════ BUYER: CHECKOUT ══════ -->
+<div id="sc-buy-checkout" class="screen">
+  <div class="topbar"><span class="back-btn" onclick="buyerShow('buy-home')">← Volver</span><h1>Completar compra</h1></div>
+  <div class="scroll">
+    <div class="ocard">
+      <div class="orow"><span>Número</span><span id="bck-num" style="font-weight:700;color:var(--accent);font-family:'DM Mono',monospace">—</span></div>
+      <div class="orow"><span>Premio</span><span id="bck-prize">—</span></div>
+      <div class="orow otot"><span>Total</span><span id="bck-total" style="color:var(--accent)">—</span></div>
+    </div>
+    <div class="slbl">Tus datos</div>
+    <div class="fg"><label class="fl">Nombre y apellido *</label><input class="fi" type="text" id="bin-name" placeholder="Juan Pérez" oninput="buyerChkF()" autocomplete="name"></div>
+    <div class="fg"><label class="fl">WhatsApp *</label><input class="fi" type="tel" id="bin-phone" placeholder="11 2345-6789" oninput="buyerChkF()" autocomplete="tel"></div>
+    <div class="fg"><label class="fl">Email *</label><input class="fi" type="email" id="bin-email" placeholder="juan@gmail.com" oninput="buyerChkF()" autocomplete="email"></div>
+    <div class="row2">
+      <div class="fg"><label class="fl">DNI *</label><input class="fi" type="number" id="bin-dni" placeholder="30123456" oninput="buyerChkF()"></div>
+      <div class="fg"><label class="fl">Localidad</label><input class="fi" type="text" id="bin-city" placeholder="Córdoba"></div>
+    </div>
+    <div class="slbl">Forma de pago</div>
+    <div class="pay-grid">
+      <div class="po sel" onclick="buyerSelPay(this,'mp')"><span class="po-icon">💳</span><div class="po-name">Mercado Pago</div><div class="po-sub">Hasta 12 cuotas</div></div>
+      <div class="po" onclick="buyerSelPay(this,'card')"><span class="po-icon">💳</span><div class="po-name">Tarjeta</div><div class="po-sub">Crédito / débito</div></div>
+      <div class="po" onclick="buyerSelPay(this,'transfer')"><span class="po-icon">🏦</span><div class="po-name">Transferencia</div><div class="po-sub">Alias / CVU</div></div>
+      <div class="po" onclick="buyerSelPay(this,'cash')"><span class="po-icon">💵</span><div class="po-name">Efectivo</div><div class="po-sub">Reserva 48hs</div></div>
+    </div>
+    <div id="bpay-detail"></div>
+    <button class="btn" id="bconf-btn" disabled onclick="buyerGoPay()">Confirmar y continuar →</button>
+  </div>
+</div>
+
+<!-- ══════ BUYER: PAY ══════ -->
+<div id="sc-buy-pay" class="screen">
+  <div class="topbar"><span class="back-btn" onclick="buyerShow('buy-checkout')">← Volver</span><h1>Pagar</h1></div>
+  <div class="scroll">
+    <div class="ib ib-blue">Número <strong id="bpay-num">#—</strong> reservado por <strong>15 minutos</strong>.</div>
+    <div id="bpay-content"></div>
+  </div>
+</div>
+
+<!-- ══════ BUYER: ÉXITO ══════ -->
+<div id="sc-buy-ok" class="screen">
+  <div class="topbar" style="justify-content:center"><h1>¡Pago confirmado! 🎉</h1></div>
+  <div class="scroll">
+    <div class="ticket">
+      <div class="ticket-lbl">Tu número de rifa</div>
+      <div class="ticket-n" id="bok-num">—</div>
+      <div class="ticket-name" id="bok-name">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px" id="bok-prize">—</div>
+      <div class="vbadge"><svg width="10" height="10" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Pago verificado</div>
+    </div>
+    <div class="ocard">
+      <div class="orow"><span>Sorteo</span><span id="bok-date" style="font-weight:500">—</span></div>
+      <div class="orow"><span>DNI</span><span id="bok-dni" style="font-family:'DM Mono',monospace">—</span></div>
+      <div class="orow"><span>Teléfono</span><span id="bok-phone">—</span></div>
+      <div class="orow otot"><span>Pagado</span><span id="bok-amt" style="color:var(--accent)">—</span></div>
+    </div>
+    <button class="btn btn-gold" onclick="buyerPrintTicket()">🖨️ Imprimir boleto</button>
+    <button class="btn-ghost" onclick="buyerShareTicket()">Compartir comprobante</button>
+    <button class="btn-ghost" style="margin-top:8px" onclick="buyerBackHome()">Volver al inicio</button>
+  </div>
+</div>
+
+<!-- ══════ ADMIN: HOME ══════ -->
+<div id="sc-adm-home" class="screen">
+  <div class="topbar"><h1 id="adm-title">🎟️ Mi Rifa — Admin</h1></div>
+  <div class="scroll">
+    <div class="hero">
+      <div class="hero-placeholder" id="adm-placeholder">🏆</div>
+      <img id="adm-hero-img" class="hero-img" style="display:none" src="" alt="Premio">
+      <div class="hero-overlay">
+        <div class="hero-eyebrow">Modo administrador</div>
+        <div class="hero-title" id="adm-prize">—</div>
+        <div class="hero-sub" id="adm-meta">—</div>
+        <div class="hero-badges">
+          <span class="hbadge" id="adm-price-b">—</span>
+          <span class="hbadge" id="adm-range-b">—</span>
+          <span class="hbadge" style="background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:#f87171">ADMIN</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-n" id="ast-a" style="color:var(--accent)">—</div><div class="stat-l">Por vender</div></div>
+      <div class="stat-box"><div class="stat-n" id="ast-s" style="color:var(--green)">—</div><div class="stat-l">Vendidos</div></div>
+      <div class="stat-box"><div class="stat-n" id="ast-r" style="color:var(--amber)">—</div><div class="stat-l">Reservados</div></div>
+    </div>
+
+    <!-- Share admin -->
+    <div onclick="adminShare()" style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:var(--r);padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer">
+      <div style="font-size:28px">🔗</div>
+      <div style="flex:1"><div style="font-weight:600;font-size:14px">Link para compradores</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Compartí solo la vista de compra</div></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+
+    <div class="legend">
+      <div class="li"><div class="ldot" style="background:var(--sold-bg);border:1px solid var(--sold-border)"></div>Vendido (tocá para editar)</div>
+      <div class="li"><div class="ldot" style="background:var(--res-bg);border:1px solid var(--res-border)"></div>Reservado</div>
+      <div class="li"><div class="ldot" style="background:var(--surface);border:1px solid var(--border)"></div>Libre</div>
+    </div>
+    <div class="num-grid" id="adm-grid"></div>
+    <div class="selbar" id="adm-selbar">Tocá un número vendido para editarlo o liberarlo</div>
+  </div>
+  <div class="tabbar" style="grid-template-columns:repeat(5,1fr)">
+    <div class="ti on" onclick="admTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg><span>Números</span></div>
+    <div class="ti" onclick="admTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Estadística</span></div>
+    <div class="ti" onclick="admTab('draw')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Sorteo</span></div>
+    <div class="ti" onclick="admTab('buyers')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Admin</span></div>
+    <div class="ti" onclick="admTab('config')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>Config</span></div>
+  </div>
+</div>
+
+<!-- ══════ ADMIN: STATS ══════ -->
+<div id="sc-adm-stats" class="screen">
+  <div class="topbar"><h1>📊 Estadísticas</h1></div>
+  <div class="scroll">
+    <div class="stat-big"><div class="stat-big-n" id="stt-rec" style="color:var(--accent)">$0</div><div class="stat-l">Total recaudado</div><div class="progress-bar" style="margin-top:10px"><div class="progress-fill" id="prog-f" style="width:0%"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px" id="prog-lbl">0 de 0 números vendidos</div></div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-n" id="stt-s" style="color:var(--green)">0</div><div class="stat-l">Vendidos</div></div>
+      <div class="stat-box"><div class="stat-n" id="stt-r" style="color:var(--amber)">0</div><div class="stat-l">Reservados</div></div>
+      <div class="stat-box"><div class="stat-n" id="stt-a" style="color:var(--accent)">0</div><div class="stat-l">Disponibles</div></div>
+    </div>
+    <div class="slbl">Por método de pago</div>
+    <div id="pay-brkdn"></div>
+    <div class="slbl">Historial de sorteos</div>
+    <div id="draw-brkdn"></div>
+  </div>
+  <div class="tabbar" style="grid-template-columns:repeat(5,1fr)">
+    <div class="ti" onclick="admTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg><span>Números</span></div>
+    <div class="ti on" onclick="admTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Estadística</span></div>
+    <div class="ti" onclick="admTab('draw')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Sorteo</span></div>
+    <div class="ti" onclick="admTab('buyers')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Admin</span></div>
+    <div class="ti" onclick="admTab('config')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>Config</span></div>
+  </div>
+</div>
+
+<!-- ══════ ADMIN: SORTEO ══════ -->
+<div id="sc-adm-draw" class="screen">
+  <div class="topbar"><h1>🎰 Sorteos</h1></div>
+  <div class="scroll">
+    <div class="ib ib-blue">Podés realizar <strong>múltiples sorteos</strong>. Cada uno queda guardado en el historial.</div>
+    <div class="fg"><label class="fl">Nombre del sorteo</label><input class="fi" id="draw-name" placeholder="Ej: 1er Premio, 2do Premio..."></div>
+    <div class="fg"><label class="fl">Número ganador de la Lotería Nacional</label><input class="fi" type="number" id="lot-num" placeholder="Ej: 38472" style="font-size:20px;text-align:center;font-family:'DM Mono',monospace"></div>
+    <button class="btn" onclick="doDrawing()">🎰 Realizar sorteo</button>
+    <div class="sorteo-drum" id="draw-drum" style="display:none">
+      <div class="drum-label">Número ganador</div>
+      <div class="drum-num" id="drum-disp">—</div>
+      <div id="drum-winner" style="margin-top:10px;font-size:14px;color:var(--muted)"></div>
+    </div>
+    <div id="draw-hist-wrap" style="display:none">
+      <div class="slbl">Historial</div>
+      <div id="draw-hist"></div>
+    </div>
+  </div>
+  <div class="tabbar" style="grid-template-columns:repeat(5,1fr)">
+    <div class="ti" onclick="admTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg><span>Números</span></div>
+    <div class="ti" onclick="admTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Estadística</span></div>
+    <div class="ti on" onclick="admTab('draw')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Sorteo</span></div>
+    <div class="ti" onclick="admTab('buyers')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Admin</span></div>
+    <div class="ti" onclick="admTab('config')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>Config</span></div>
+  </div>
+</div>
+
+<!-- ══════ ADMIN: COMPRADORES ══════ -->
+<div id="sc-adm-buyers" class="screen">
+  <div class="topbar"><h1>👥 Compradores</h1></div>
+  <div class="scroll">
+    <div class="stats-grid" style="margin-bottom:12px">
+      <div class="stat-box"><div class="stat-n" style="color:var(--accent)" id="adm-rec">$0</div><div class="stat-l">Recaudado</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--green)" id="adm-ps">0</div><div class="stat-l">Pagados</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--amber)" id="adm-pr">0</div><div class="stat-l">Reservados</div></div>
+    </div>
+    <div class="seg">
+      <button class="seg-btn on" id="sb-list" onclick="buyersSeg(this,'list')">Lista</button>
+      <button class="seg-btn" id="sb-print" onclick="buyersSeg(this,'print')">Imprimir</button>
+      <button class="seg-btn" id="sb-export" onclick="buyersSeg(this,'export')">Exportar</button>
+    </div>
+    <div id="buyers-list-wrap">
+      <div id="buyers-list"></div>
+      <div id="buyers-empty" style="display:none;text-align:center;padding:32px 0;color:var(--muted);font-size:14px">Todavía no hay compradores.</div>
+    </div>
+    <div id="buyers-print-wrap" style="display:none">
+      <div class="ib ib-blue">Generá boletos imprimibles.</div>
+      <button class="btn" onclick="printAll('pagado')">🖨️ Imprimir boletos pagados</button>
+      <button class="btn-ghost" onclick="printAll('todos')">Imprimir todos</button>
+    </div>
+    <div id="buyers-export-wrap" style="display:none">
+      <div class="ib ib-blue">Exportá la lista completa.</div>
+      <button class="btn" onclick="exportCSV()">Descargar CSV</button>
+      <button class="btn-ghost" onclick="copyList()">Copiar como texto</button>
+      <div id="cp-ok" class="ib ib-green" style="display:none;margin-top:10px">Copiado.</div>
+    </div>
+  </div>
+  <div class="tabbar" style="grid-template-columns:repeat(5,1fr)">
+    <div class="ti" onclick="admTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg><span>Números</span></div>
+    <div class="ti" onclick="admTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Estadística</span></div>
+    <div class="ti" onclick="admTab('draw')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Sorteo</span></div>
+    <div class="ti on" onclick="admTab('buyers')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Admin</span></div>
+    <div class="ti" onclick="admTab('config')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>Config</span></div>
+  </div>
+</div>
+
+<!-- ══════ ADMIN: CONFIG ══════ -->
+<div id="sc-adm-config" class="screen">
+  <div class="topbar"><h1>⚙️ Configurar</h1></div>
+  <div class="scroll">
+    <div class="ib ib-amber">Los datos se guardan en este dispositivo.</div>
+
+    <div class="slbl">Imagen del premio</div>
+    <img id="cfg-img-preview" class="img-preview-cfg" src="" alt="Vista previa">
+    <div class="img-upload-area" onclick="document.getElementById('img-file').click()">
+      <div style="font-size:28px;margin-bottom:6px">📷</div>
+      <div style="font-size:14px;color:var(--muted)">Tocá para subir foto del premio</div>
+      <input type="file" id="img-file" accept="image/*" style="display:none" onchange="handleImg(this)">
+    </div>
+    <button class="btn-ghost" onclick="removeImg()" id="btn-remove-img" style="display:none;margin-bottom:12px">Quitar imagen</button>
+
+    <div class="slbl">Información del sorteo</div>
+    <div class="fg"><label class="fl">Nombre del premio</label><input class="fi" id="cfg-prize" placeholder="Auto 0km Peugeot 208"></div>
+    <div class="fg"><label class="fl">Descripción</label><input class="fi" id="cfg-meta" placeholder="Premio $10M · Sorteo: 20/07/2025"></div>
+    <div class="fg"><label class="fl">Fecha del sorteo</label><input class="fi" id="cfg-date" placeholder="20/07/2025"></div>
+
+    <div class="slbl">Números</div>
+    <div class="row2">
+      <div class="fg"><label class="fl">Desde</label><input class="fi" type="number" id="cfg-from" placeholder="1"></div>
+      <div class="fg"><label class="fl">Hasta</label><input class="fi" type="number" id="cfg-to" placeholder="200"></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label class="fl">Dígitos (3=001)</label><input class="fi" type="number" id="cfg-digits" placeholder="3" min="1" max="4"></div>
+      <div class="fg"><label class="fl">Precio por número</label><input class="fi" type="number" id="cfg-price" placeholder="20000"></div>
+    </div>
+
+    <div class="slbl">Link de la app (para compartir)</div>
+    <div class="fg"><label class="fl">URL de Tiiny.host / Netlify</label><input class="fi" type="url" id="cfg-url" placeholder="https://mi-rifa.tiiny.site"></div>
+    <div class="ib ib-blue" style="font-size:12px">
+      Los compradores entran a: <strong id="url-buyer-preview">tu-url.tiiny.site</strong><br>
+      Vos (admin) entrás a: <strong id="url-admin-preview">tu-url.tiiny.site/?admin</strong>
+    </div>
+
+    <div class="slbl">Transferencia bancaria</div>
+    <div class="fg"><label class="fl">Alias</label><input class="fi" id="cfg-alias" placeholder="MI.RIFA.AR"></div>
+    <div class="fg"><label class="fl">CVU / CBU</label><input class="fi" id="cfg-cvu" placeholder="0000003100..."></div>
+    <div class="fg"><label class="fl">Titular</label><input class="fi" id="cfg-holder" placeholder="Juan Pérez"></div>
+
+    <div class="slbl">Contacto</div>
+    <div class="fg"><label class="fl">WhatsApp (con código país, sin +)</label><input class="fi" type="tel" id="cfg-wa" placeholder="5491112345678"></div>
+
+    <div class="slbl">Mercado Pago</div>
+    <div class="fg"><label class="fl">MP Public Key (producción)</label><input class="fi" id="cfg-mpk" placeholder="APP_USR-..."></div>
+
+    <div class="slbl">Seguridad</div>
+    <div class="fg"><label class="fl">PIN de administrador (4-6 dígitos)</label><input class="fi" type="password" id="cfg-pin" placeholder="1234" maxlength="6"></div>
+
+    <button class="btn" onclick="saveConfig()" style="margin-top:6px">Guardar configuración</button>
+    <div id="cfg-ok" class="ib ib-green" style="display:none;margin-top:12px">Configuración guardada.</div>
+    <div style="height:30px"></div>
+  </div>
+  <div class="tabbar" style="grid-template-columns:repeat(5,1fr)">
+    <div class="ti" onclick="admTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg><span>Números</span></div>
+    <div class="ti" onclick="admTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Estadística</span></div>
+    <div class="ti" onclick="admTab('draw')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Sorteo</span></div>
+    <div class="ti" onclick="admTab('buyers')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Admin</span></div>
+    <div class="ti on" onclick="admTab('config')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span>Config</span></div>
+  </div>
+</div>
+
+<!-- ══════ MODAL: EDITAR NÚMERO ══════ -->
+<div class="modal-wrap" id="modal-edit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-title">Número #—</div>
+    <div id="edit-info" style="font-size:14px;color:var(--muted);line-height:2;margin-bottom:14px"></div>
+    <button class="btn btn-danger" onclick="liberarNum()">🔓 Liberar número (volver a vender)</button>
+    <button class="btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ══════ MODAL: DETALLE COMPRADOR ══════ -->
+<div class="modal-wrap" id="modal-buyer">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mb-title">Comprador</div>
+    <div id="mb-detail" style="font-size:14px;line-height:2;color:var(--muted)"></div>
+    <button class="btn btn-danger" style="margin-top:14px" onclick="liberarDesdeAdmin()">🔓 Liberar y volver a vender</button>
+    <button class="btn-ghost" onclick="closeModal('modal-buyer')">Cerrar</button>
+  </div>
+</div>
+
+<!-- ══════ MODAL: LOGIN ADMIN ══════ -->
+<div class="modal-wrap" id="modal-pin" style="align-items:center;padding:20px">
+  <div class="modal" style="border-radius:var(--r);max-width:340px;margin:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="text-align:center">🔐 Acceso Admin</div>
+    <div class="ib ib-amber" style="text-align:center">Ingresá tu PIN para continuar</div>
+    <input class="fi" type="password" id="pin-input" placeholder="••••" maxlength="6" style="text-align:center;font-size:24px;letter-spacing:8px;margin-bottom:12px">
+    <button class="btn" onclick="checkPin()">Ingresar</button>
+    <div id="pin-err" class="ib ib-red" style="display:none;margin-top:10px;text-align:center">PIN incorrecto</div>
+  </div>
+</div>
+
+<div class="print-area" id="print-area"></div>
+
+<script>
+/* ══════════ ESTADO ══════════ */
+var cfg = JSON.parse(localStorage.getItem('rifaCfg')||'null') || {
+  prize:'Auto 0km Peugeot 208', meta:'Premio $10.000.000 · Sorteo: 20/07/2025',
+  date:'20/07/2025', from:1, to:200, digits:3, price:20000,
+  alias:'GUSBORDA60', cvu:'0270110920017835030014', holder:'Gustavo Gabriel Borda', wa:'5492664301229',
+  mpk:'', pin:'1234', url:'', imgData:null
+};
+var soldMap   = JSON.parse(localStorage.getItem('rifaSold')||'{}');
+var resMap    = JSON.parse(localStorage.getItem('rifaRes')||'{}');
+var buyers    = JSON.parse(localStorage.getItem('rifaBuyers')||'[]');
+var drawHist  = JSON.parse(localStorage.getItem('rifaDraws')||'[]');
+
+var selNum=null, buyerPayM='mp', editNum=null, curBuyerIdx=null;
+
+/* ══════════ HELPERS ══════════ */
+function fmt(n){return String(n).padStart(cfg.digits,'0');}
+function fmtP(n){return '$'+Number(n).toLocaleString('es-AR');}
+function save(){
+  localStorage.setItem('rifaSold',JSON.stringify(soldMap));
+  localStorage.setItem('rifaRes',JSON.stringify(resMap));
+  localStorage.setItem('rifaBuyers',JSON.stringify(buyers));
+  localStorage.setItem('rifaDraws',JSON.stringify(drawHist));
+}
+
+/* ══════════ DETECTAR MODO ══════════ */
+var IS_ADMIN = window.location.search.includes('admin');
+
+function init(){
+  cleanReserved();
+  if(IS_ADMIN){
+    // Mostrar PIN antes de entrar al panel
+    document.getElementById('modal-pin').classList.add('open');
+    // Enfocar input PIN
+    setTimeout(function(){document.getElementById('pin-input').focus();},300);
+  } else {
+    buyerInit();
+  }
+}
+
+/* ══════════ ADMIN LOGIN ══════════ */
+function checkPin(){
+  var v=document.getElementById('pin-input').value;
+  if(v===cfg.pin){
+    document.getElementById('modal-pin').classList.remove('open');
+    admInit();
+  } else {
+    document.getElementById('pin-err').style.display='block';
+    document.getElementById('pin-input').value='';
+    setTimeout(function(){document.getElementById('pin-err').style.display='none';},2000);
+  }
+}
+document.getElementById('pin-input').addEventListener('keyup',function(e){if(e.key==='Enter')checkPin();});
+
+/* ══════════ PANTALLAS ══════════ */
+function showSc(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+/* ══════════ ── VISTA COMPRADOR ── ══════════ */
+function buyerInit(){
+  buildBuyerGrid();
+  buyerUpdateStats();
+  showSc('sc-buy-home');
+}
+function buyerShow(id){showSc('sc-'+id);}
+
+function buildBuyerGrid(){
+  var g=document.getElementById('buy-grid');
+  var total=cfg.to-cfg.from+1;
+  g.style.gridTemplateColumns='repeat('+(total<=50?5:10)+',1fr)';
+  g.innerHTML='';
+  for(var i=cfg.from;i<=cfg.to;i++){
+    var b=document.createElement('button');
+    b.className='nb'; b.textContent=fmt(i);
+    if(soldMap[i]||resMap[i]){
+      b.classList.add(soldMap[i]?'sold':'reserved');
+    } else {
+      (function(num,el){el.onclick=function(){buyerToggle(num,el);};})(i,b);
+    }
+    g.appendChild(b);
+  }
+  buyerUpdateStats();
+}
+
+function buyerToggle(n,el){
+  if(selNum===n){
+    selNum=null;
+    document.querySelectorAll('#buy-grid .nb').forEach(function(b){b.classList.remove('sel');});
+    document.getElementById('buy-selbar').textContent='Tocá un número para seleccionarlo';
+    document.getElementById('buy-selbar').className='selbar';
+    document.getElementById('buy-btn').style.display='none';
+  } else {
+    document.querySelectorAll('#buy-grid .nb').forEach(function(b){b.classList.remove('sel');});
+    el.classList.add('sel'); selNum=n;
+    document.getElementById('buy-selbar').textContent='Número #'+fmt(n)+' seleccionado · '+fmtP(cfg.price);
+    document.getElementById('buy-selbar').className='selbar on';
+    document.getElementById('buy-btn').style.display='block';
+  }
+}
+
+function buyerUpdateStats(){
+  var s=Object.keys(soldMap).length, r=Object.keys(resMap).length;
+  var a=(cfg.to-cfg.from+1)-s-r;
+  document.getElementById('bst-a').textContent=a;
+  document.getElementById('bst-s').textContent=s;
+  document.getElementById('bst-r').textContent=r;
+  document.getElementById('bh-title').textContent='🎟️ '+cfg.prize;
+  document.getElementById('bh-prize').textContent=cfg.prize;
+  document.getElementById('bh-meta').textContent=cfg.meta;
+  document.getElementById('bh-price').textContent=fmtP(cfg.price)+' c/número';
+  document.getElementById('bh-range').textContent='Del '+fmt(cfg.from)+' al '+fmt(cfg.to);
+  if(cfg.imgData){
+    document.getElementById('bh-img').src=cfg.imgData;
+    document.getElementById('bh-img').style.display='block';
+    document.getElementById('bh-placeholder').style.display='none';
+  }
+}
+
+function buyerGoCheckout(){
+  document.getElementById('bck-num').textContent='#'+fmt(selNum);
+  document.getElementById('bck-prize').textContent=cfg.prize;
+  document.getElementById('bck-total').textContent=fmtP(cfg.price);
+  buyerPayDetail();
+  buyerShow('buy-checkout');
+}
+function buyerSelPay(el,m){
+  document.querySelectorAll('#sc-buy-checkout .po').forEach(function(e){e.classList.remove('sel');});
+  el.classList.add('sel'); buyerPayM=m; buyerPayDetail();
+}
+function buyerPayDetail(){
+  var d=document.getElementById('bpay-detail');
+  if(buyerPayM==='transfer'){
+    d.innerHTML='<div class="ib ib-blue"><strong>Alias:</strong> '+(cfg.alias||'(configurar)')+'<br><strong>CVU:</strong> '+(cfg.cvu||'—')+(cfg.holder?'<br><strong>Titular:</strong> '+cfg.holder:'Gustavo Gabriel Borda')+'<br>Enviá el comprobante al +'+cfg.wa+'</div>';
+  } else if(buyerPayM==='cash'){
+    d.innerHTML='<div class="ib ib-amber">Reserva de <strong>48 horas</strong>. WhatsApp: +'+cfg.wa+'</div>';
+  } else {d.innerHTML='';}
+}
+function buyerChkF(){
+  var ok=document.getElementById('bin-name').value.trim().length>2
+    &&document.getElementById('bin-phone').value.trim().length>6
+    &&document.getElementById('bin-email').value.includes('@')
+    &&document.getElementById('bin-dni').value.trim().length>=7;
+  document.getElementById('bconf-btn').disabled=!ok;
+}
+function buyerGoPay(){
+  var n=selNum;
+  resMap[n]={name:document.getElementById('bin-name').value,phone:document.getElementById('bin-phone').value,email:document.getElementById('bin-email').value,dni:document.getElementById('bin-dni').value,city:document.getElementById('bin-city').value,method:buyerPayM,ts:Date.now()};
+  save();
+  document.getElementById('bpay-num').textContent='#'+fmt(n);
+  buyerShow('buy-pay');
+  renderBuyerPay();
+}
+function renderBuyerPay(){
+  var c=document.getElementById('bpay-content');
+  var n=selNum;
+  if(buyerPayM==='mp'){
+    c.innerHTML='<div class="ocard"><div class="orow"><span>Número</span><span style="font-weight:700;color:var(--accent);font-family:\'DM Mono\',monospace">#'+fmt(n)+'</span></div><div class="orow otot"><span>Total</span><span style="color:var(--accent)">'+fmtP(cfg.price)+'</span></div></div>'+(cfg.mpk&&cfg.mpk.startsWith('APP_USR')?'<div class="ib ib-blue">Checkout Pro de Mercado Pago activo.</div>':'<div class="ib ib-amber">Modo demo: configurá tu Public Key en la sección Admin → Config.</div>')+'<button class="btn" onclick="buyerDoSuccess()">Confirmar pago</button>';
+  } else if(buyerPayM==='card'){
+    c.innerHTML='<div class="ocard"><div class="fg"><label class="fl">Número de tarjeta</label><input class="fi" type="tel" placeholder="**** **** **** ****"></div><div class="row2"><div class="fg"><label class="fl">Vencimiento</label><input class="fi" placeholder="MM/AA"></div><div class="fg"><label class="fl">CVV</label><input class="fi" type="tel" placeholder="***"></div></div></div><button class="btn" onclick="buyerDoSuccess()">Pagar '+fmtP(cfg.price)+'</button>';
+  } else if(buyerPayM==='transfer'){
+    c.innerHTML='<div class="ib ib-blue"><strong>Alias:</strong> '+(cfg.alias||'—')+'<br><strong>CVU:</strong> '+(cfg.cvu||'—')+(cfg.holder?'<br><strong>Titular:</strong> '+cfg.holder:'Gustavo Gabriel Borda')+'<br><br><strong>Monto exacto:</strong> '+fmtP(cfg.price)+'</div><div class="ib ib-amber">Enviá el comprobante por WhatsApp al +'+cfg.wa+'</div><a href="https://wa.me/'+cfg.wa+'?text='+encodeURIComponent('Hola! Transferí '+fmtP(cfg.price)+' por el número #'+fmt(selNum)+' del sorteo '+cfg.prize+'.')+'" style="display:block;text-decoration:none"><button class="btn">Enviar comprobante por WhatsApp</button></a><button class="btn-ghost" onclick="buyerDoSuccess()">Ya transferí, confirmar reserva</button>';
+  } else {
+    c.innerHTML='<div class="ib ib-amber">Número <strong>#'+fmt(n)+'</strong> reservado 48hs.</div><a href="https://wa.me/'+cfg.wa+'?text='+encodeURIComponent('Hola! Quiero pagar en efectivo el número #'+fmt(selNum)+'. Soy: '+document.getElementById('bin-name').value)+'" style="display:block;text-decoration:none"><button class="btn">Coordinar por WhatsApp</button></a><button class="btn-ghost" onclick="buyerDoSuccess()">Confirmar reserva</button>';
+  }
+}
+function buyerDoSuccess(){
+  var n=selNum;
+  var buyer={num:n,name:document.getElementById('bin-name').value,phone:document.getElementById('bin-phone').value,email:document.getElementById('bin-email').value,dni:document.getElementById('bin-dni').value,city:document.getElementById('bin-city').value,method:buyerPayM,status:(buyerPayM==='cash'||buyerPayM==='transfer')?'reservado':'pagado',amount:cfg.price,ts:Date.now()};
+  soldMap[n]=buyer; delete resMap[n]; buyers.unshift(buyer); save();
+  // Notificar al organizador por WhatsApp automáticamente
+  var metodosLabel={mp:'Mercado Pago',card:'Tarjeta',transfer:'Transferencia bancaria',cash:'Efectivo'};
+  var msgAdmin='🎟️ *NUEVO NÚMERO VENDIDO*\n\n'
+    +'*Número:* #'+fmt(n)+'\n'
+    +'*Comprador:* '+buyer.name+'\n'
+    +'*WhatsApp:* '+buyer.phone+'\n'
+    +'*Email:* '+(buyer.email||'—')+'\n'
+    +'*DNI:* '+(buyer.dni||'—')+'\n'
+    +'*Localidad:* '+(buyer.city||'—')+'\n'
+    +'*Pago:* '+metodosLabel[buyerPayM]+'\n'
+    +'*Monto:* '+fmtP(cfg.price)+'\n'
+    +'*Estado:* '+(buyer.status==='pagado'?'✅ PAGADO':'⏳ RESERVADO — pendiente de confirmación')+'\n\n'
+    +(buyerPayM==='transfer'?'📎 El comprador adjuntará el comprobante de transferencia.':'');
+  setTimeout(function(){
+    var waUrl='https://wa.me/'+cfg.wa+'?text='+encodeURIComponent(msgAdmin);
+    window.open(waUrl,'_blank');
+  },1500);
+  document.getElementById('bok-num').textContent='#'+fmt(n);
+  document.getElementById('bok-name').textContent=buyer.name;
+  document.getElementById('bok-prize').textContent=cfg.prize;
+  document.getElementById('bok-date').textContent=cfg.date;
+  document.getElementById('bok-dni').textContent=buyer.dni;
+  document.getElementById('bok-phone').textContent=buyer.phone;
+  document.getElementById('bok-amt').textContent=fmtP(cfg.price);
+  buyerShow('buy-ok');
+}
+function buyerBackHome(){
+  selNum=null;
+  document.getElementById('buy-btn').style.display='none';
+  document.getElementById('buy-selbar').textContent='Tocá un número para seleccionarlo';
+  document.getElementById('buy-selbar').className='selbar';
+  ['bin-name','bin-phone','bin-email','bin-city'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('bin-dni').value='';
+  document.getElementById('bconf-btn').disabled=true;
+  buyerPayM='mp';
+  document.querySelectorAll('#sc-buy-checkout .po').forEach(function(e){e.classList.remove('sel');});
+  document.querySelectorAll('#sc-buy-checkout .po')[0].classList.add('sel');
+  buildBuyerGrid();
+  buyerShow('buy-home');
+}
+function buyerShareTicket(){
+  var n=selNum;
+  var txt='Compré el número #'+fmt(n)+' del sorteo "'+cfg.prize+'"!\nSorteo: '+cfg.date+(cfg.url?'\n\nComprá el tuyo: '+cfg.url:'');
+  if(navigator.share){navigator.share({title:'Mi número de rifa',text:txt});}
+  else{navigator.clipboard.writeText(txt).then(function(){alert('Copiado!');});}
+}
+function buyerPrintTicket(){
+  var n=selNum||parseInt(document.getElementById('bok-num').textContent.replace('#',''));
+  var b=soldMap[n]||{name:document.getElementById('bok-name').textContent,dni:document.getElementById('bok-dni').textContent,phone:document.getElementById('bok-phone').textContent};
+  renderPrintArea([{num:n,buyer:b}]);
+  setTimeout(function(){window.print();},200);
+}
+
+/* ══════════ ── VISTA ADMIN ── ══════════ */
+function admInit(){
+  admUpdateStats();
+  buildAdmGrid();
+  fillCfgForm();
+  buildDrawHist();
+  showSc('sc-adm-home');
+}
+
+function admTab(tab){
+  var scMap={home:'sc-adm-home',stats:'sc-adm-stats',draw:'sc-adm-draw',buyers:'sc-adm-buyers',config:'sc-adm-config'};
+  showSc(scMap[tab]);
+  if(tab==='stats') buildStats();
+  if(tab==='buyers'){admUpdateStats();buildBuyersList();}
+  if(tab==='draw') buildDrawHist();
+  if(tab==='config') fillCfgForm();
+}
+
+function admUpdateStats(){
+  var s=Object.keys(soldMap).length, r=Object.keys(resMap).length;
+  var a=(cfg.to-cfg.from+1)-s-r;
+  document.getElementById('ast-a').textContent=a;
+  document.getElementById('ast-s').textContent=s;
+  document.getElementById('ast-r').textContent=r;
+  document.getElementById('adm-title').textContent='🎟️ '+cfg.prize+' — Admin';
+  document.getElementById('adm-prize').textContent=cfg.prize;
+  document.getElementById('adm-meta').textContent=cfg.meta;
+  document.getElementById('adm-price-b').textContent=fmtP(cfg.price)+' c/número';
+  document.getElementById('adm-range-b').textContent='Del '+fmt(cfg.from)+' al '+fmt(cfg.to);
+  if(cfg.imgData){
+    document.getElementById('adm-hero-img').src=cfg.imgData;
+    document.getElementById('adm-hero-img').style.display='block';
+    document.getElementById('adm-placeholder').style.display='none';
+  }
+  // buyers panel stats
+  var paid=buyers.filter(function(b){return b.status==='pagado';});
+  var res=buyers.filter(function(b){return b.status==='reservado';});
+  var rec=paid.reduce(function(s,b){return s+(b.amount||cfg.price);},0);
+  document.getElementById('adm-rec').textContent=fmtP(rec);
+  document.getElementById('adm-ps').textContent=paid.length;
+  document.getElementById('adm-pr').textContent=res.length;
+}
+
+function buildAdmGrid(){
+  var g=document.getElementById('adm-grid');
+  var total=cfg.to-cfg.from+1;
+  g.style.gridTemplateColumns='repeat('+(total<=50?5:10)+',1fr)';
+  g.innerHTML='';
+  for(var i=cfg.from;i<=cfg.to;i++){
+    var b=document.createElement('button');
+    b.className='nb'; b.textContent=fmt(i);
+    if(soldMap[i]){b.classList.add('sold','sold-admin');(function(num){b.onclick=function(){openEditModal(num);};})(i);}
+    else if(resMap[i]){b.classList.add('reserved','reserved-admin');(function(num){b.onclick=function(){openEditModal(num);};})(i);}
+    else{(function(num,el){el.onclick=function(){document.getElementById('adm-selbar').textContent='Número #'+fmt(num)+' libre — disponible para comprar';};})(i,b);}
+    g.appendChild(b);
+  }
+}
+
+function adminShare(){
+  var url=cfg.url||window.location.href.split('?')[0];
+  var txt='🎟️ '+cfg.prize+'\n\nComprá tu número de rifa acá:\n'+url+'\n\nPrecio: '+fmtP(cfg.price)+' · Sorteo: '+cfg.date;
+  if(navigator.share){navigator.share({title:cfg.prize,text:'Comprá tu número:',url:url});}
+  else{navigator.clipboard.writeText(url).then(function(){alert('Link copiado!\n\n'+url+'\n\nCompartilo con los compradores.');});}
+}
+
+/* Editar/liberar número */
+function openEditModal(n){
+  editNum=n;
+  var data=soldMap[n]||resMap[n]||{};
+  var status=soldMap[n]?'VENDIDO':'RESERVADO';
+  var ml={mp:'Mercado Pago',card:'Tarjeta',transfer:'Transferencia',cash:'Efectivo'};
+  document.getElementById('edit-title').textContent='Número #'+fmt(n)+' — '+status;
+  document.getElementById('edit-info').innerHTML=
+    (data.name?'👤 <strong>'+data.name+'</strong><br>':'')+
+    (data.phone?'📞 '+data.phone+'<br>':'')+
+    (data.email?'📧 '+data.email+'<br>':'')+
+    (data.dni?'🪪 DNI: '+data.dni+'<br>':'')+
+    (data.method?'💳 '+(ml[data.method]||data.method)+'<br>':'')+
+    (data.amount?'💰 '+fmtP(data.amount):'');
+  openModal('modal-edit');
+}
+function liberarNum(){
+  if(!editNum)return;
+  delete soldMap[editNum]; delete resMap[editNum];
+  buyers=buyers.filter(function(b){return b.num!==editNum;});
+  save(); closeModal('modal-edit'); buildAdmGrid(); admUpdateStats();
+  alert('Número #'+fmt(editNum)+' liberado. Ya se puede vender de nuevo.');
+  editNum=null;
+}
+
+/* Lista compradores admin */
+function buildBuyersList(){
+  var c=document.getElementById('buyers-list');
+  var e=document.getElementById('buyers-empty');
+  if(!buyers.length){c.innerHTML='';e.style.display='block';return;}
+  e.style.display='none';
+  var ml={mp:'Mercado Pago',card:'Tarjeta',transfer:'Transferencia',cash:'Efectivo'};
+  c.innerHTML=buyers.map(function(b,i){
+    var pill=b.status==='pagado'?'<span class="sp sp-green">Pagado</span>':'<span class="sp sp-amber">Reservado</span>';
+    var d=b.ts?new Date(b.ts).toLocaleDateString('es-AR'):'';
+    return '<div class="bc" onclick="openBuyerModal('+i+')"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="bc-num">#'+fmt(b.num)+'</div><div class="bc-name">'+b.name+'</div><div class="bc-meta">'+b.phone+(b.city?' · '+b.city:'')+'</div><div class="bc-meta">'+(ml[b.method]||b.method)+' · '+fmtP(b.amount||cfg.price)+(d?' · '+d:'')+'</div></div><div>'+pill+'</div></div></div>';
+  }).join('');
+}
+function openBuyerModal(idx){
+  curBuyerIdx=idx;
+  var b=buyers[idx];
+  var ml={mp:'Mercado Pago',card:'Tarjeta',transfer:'Transferencia',cash:'Efectivo'};
+  document.getElementById('mb-title').textContent='#'+fmt(b.num)+' — '+b.name;
+  document.getElementById('mb-detail').innerHTML='📞 '+b.phone+'<br>📧 '+(b.email||'—')+'<br>🪪 DNI: '+(b.dni||'—')+'<br>📍 '+(b.city||'—')+'<br>💳 '+(ml[b.method]||b.method)+'<br>💰 '+fmtP(b.amount||cfg.price)+'<br>📅 <strong>'+b.status.toUpperCase()+'</strong>';
+  openModal('modal-buyer');
+}
+function liberarDesdeAdmin(){
+  if(curBuyerIdx===null)return;
+  var b=buyers[curBuyerIdx]; var n=b.num;
+  delete soldMap[n]; delete resMap[n];
+  buyers.splice(curBuyerIdx,1);
+  save(); closeModal('modal-buyer'); buildBuyersList(); admUpdateStats(); buildAdmGrid();
+  alert('Número #'+fmt(n)+' de '+b.name+' liberado.');
+  curBuyerIdx=null;
+}
+function buyersSeg(el,seg){
+  document.querySelectorAll('#sc-adm-buyers .seg-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('buyers-list-wrap').style.display=seg==='list'?'block':'none';
+  document.getElementById('buyers-print-wrap').style.display=seg==='print'?'block':'none';
+  document.getElementById('buyers-export-wrap').style.display=seg==='export'?'block':'none';
+}
+
+/* Estadística */
+function buildStats(){
+  var s=Object.keys(soldMap).length, r=Object.keys(resMap).length;
+  var total=cfg.to-cfg.from+1, a=total-s-r;
+  var paid=buyers.filter(function(b){return b.status==='pagado';});
+  var rec=paid.reduce(function(sum,b){return sum+(b.amount||cfg.price);},0);
+  document.getElementById('stt-rec').textContent=fmtP(rec);
+  document.getElementById('stt-s').textContent=s;
+  document.getElementById('stt-r').textContent=r;
+  document.getElementById('stt-a').textContent=a;
+  var pct=total>0?Math.round(s/total*100):0;
+  document.getElementById('prog-f').style.width=pct+'%';
+  document.getElementById('prog-lbl').textContent=s+' de '+total+' números vendidos ('+pct+'%)';
+  var ml={mp:'Mercado Pago',card:'Tarjeta',transfer:'Transferencia',cash:'Efectivo'};
+  var mb={};
+  buyers.forEach(function(b){mb[b.method]=(mb[b.method]||0)+1;});
+  var pbH='';
+  Object.keys(ml).forEach(function(k){
+    if(mb[k]){var bpct=Math.round(mb[k]/buyers.length*100);pbH+='<div class="card" style="margin-bottom:8px"><div class="card-body"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">'+ml[k]+'</span><span style="font-size:13px;font-weight:600;color:var(--accent)">'+mb[k]+' ('+bpct+'%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+bpct+'%"></div></div></div></div>';}
+  });
+  document.getElementById('pay-brkdn').innerHTML=pbH||'<div style="color:var(--muted);font-size:13px">Sin datos.</div>';
+  var dhH=drawHist.length?drawHist.map(function(d){return '<div class="bc"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;color:var(--muted)">'+d.name+'</div><div style="font-size:22px;font-weight:700;color:var(--accent);font-family:\'DM Mono\',monospace">#'+d.numFmt+'</div><div style="font-size:13px;font-weight:500">'+(d.winner||'Sin comprador')+'</div></div><div style="font-size:11px;color:var(--muted)">'+d.date+'</div></div></div>';}).join(''):'<div style="color:var(--muted);font-size:13px">Sin sorteos realizados.</div>';
+  document.getElementById('draw-brkdn').innerHTML=dhH;
+}
+
+/* Sorteo */
+function doDrawing(){
+  var lot=parseInt(document.getElementById('lot-num').value)||0;
+  var name=document.getElementById('draw-name').value||('Sorteo '+(drawHist.length+1));
+  var total=cfg.to-cfg.from+1;
+  var winNum=(lot%total)+cfg.from;
+  var drum=document.getElementById('draw-drum');
+  var disp=document.getElementById('drum-disp');
+  var winfo=document.getElementById('drum-winner');
+  drum.style.display='block';
+  var count=0;
+  var iv=setInterval(function(){
+    var rnd=Math.floor(Math.random()*total)+cfg.from;
+    disp.textContent='#'+fmt(rnd); count++;
+    if(count>=30){
+      clearInterval(iv); disp.textContent='#'+fmt(winNum);
+      var winner=soldMap[winNum]?'🏆 Ganador: '+soldMap[winNum].name+' · '+soldMap[winNum].phone:resMap[winNum]?'⚠️ Reservado: '+resMap[winNum].name+' (sin pago)':'ℹ️ Número no vendido';
+      winfo.textContent=winner;
+      drawHist.unshift({name:name,lot:lot,winNum:winNum,numFmt:fmt(winNum),winner:soldMap[winNum]?soldMap[winNum].name:'',date:new Date().toLocaleDateString('es-AR'),ts:Date.now()});
+      save(); buildDrawHist();
+    }
+  },80);
+}
+function buildDrawHist(){
+  var w=document.getElementById('draw-hist-wrap');
+  var h=document.getElementById('draw-hist');
+  if(!drawHist.length){w.style.display='none';return;}
+  w.style.display='block';
+  h.innerHTML=drawHist.map(function(d){return '<div class="bc"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;color:var(--muted)">'+d.name+'</div><div style="font-size:22px;font-weight:700;color:var(--accent);font-family:\'DM Mono\',monospace">#'+d.numFmt+'</div><div style="font-size:13px;font-weight:500">'+(d.winner||'Sin comprador')+'</div></div><div style="font-size:11px;color:var(--muted)">'+d.date+'</div></div></div>';}).join('');
+}
+
+/* Imprimir */
+function printAll(filter){
+  var list=filter==='todos'?buyers:buyers.filter(function(b){return b.status==='pagado';});
+  if(!list.length){alert('No hay compradores para imprimir.');return;}
+  renderPrintArea(list.map(function(b){return{num:b.num,buyer:b};}));
+  setTimeout(function(){window.print();},200);
+}
+function renderPrintArea(items){
+  document.getElementById('print-area').innerHTML=items.map(function(item){
+    var b=item.buyer;
+    return '<div class="print-ticket"><div style="text-align:center;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+cfg.prize+'</div><div class="print-ticket-num">#'+fmt(item.num)+'</div><div class="print-ticket-divider"></div><div class="print-ticket-info"><strong>'+b.name+'</strong><br>DNI: '+(b.dni||'—')+'<br>Tel: '+(b.phone||'—')+'</div><div class="print-ticket-divider"></div><div style="font-size:9px;text-align:center">Sorteo: '+cfg.date+'</div></div>';
+  }).join('');
+}
+
+/* Exportar */
+function exportCSV(){
+  var rows=[['Número','Nombre','Teléfono','Email','DNI','Localidad','Método','Estado','Monto','Fecha'].join(',')];
+  buyers.forEach(function(b){var d=b.ts?new Date(b.ts).toLocaleDateString('es-AR'):'';rows.push([fmt(b.num),'"'+b.name+'"',b.phone,b.email||'',b.dni||'',b.city||'',b.method,b.status,b.amount||cfg.price,d].join(','));});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'}));
+  a.download='rifa_'+new Date().toLocaleDateString('es-AR').replace(/\//g,'-')+'.csv';
+  a.click();
+}
+function copyList(){
+  var txt=buyers.map(function(b){return '#'+fmt(b.num)+' – '+b.name+' · '+b.phone+' · '+b.status.toUpperCase();}).join('\n')||'Sin compradores';
+  navigator.clipboard.writeText(txt).then(function(){var ok=document.getElementById('cp-ok');ok.style.display='block';setTimeout(function(){ok.style.display='none';},2500);});
+}
+
+/* Config */
+function fillCfgForm(){
+  ['prize','meta','date','alias','cvu','holder','wa','mpk','url'].forEach(function(k){var el=document.getElementById('cfg-'+k);if(el)el.value=cfg[k]||'';});
+  document.getElementById('cfg-from').value=cfg.from;
+  document.getElementById('cfg-to').value=cfg.to;
+  document.getElementById('cfg-digits').value=cfg.digits;
+  document.getElementById('cfg-price').value=cfg.price;
+  document.getElementById('cfg-pin').value=cfg.pin;
+  if(cfg.imgData){document.getElementById('cfg-img-preview').src=cfg.imgData;document.getElementById('cfg-img-preview').style.display='block';document.getElementById('btn-remove-img').style.display='block';}
+  updateUrlPreview();
+}
+function updateUrlPreview(){
+  var url=document.getElementById('cfg-url').value||'tu-url.tiiny.site';
+  document.getElementById('url-buyer-preview').textContent=url;
+  document.getElementById('url-admin-preview').textContent=url+'/?admin';
+}
+document.getElementById('cfg-url').addEventListener('input',updateUrlPreview);
+
+function saveConfig(){
+  ['prize','meta','date','alias','cvu','holder','wa','mpk','url'].forEach(function(k){var el=document.getElementById('cfg-'+k);if(el)cfg[k]=el.value.trim();});
+  cfg.from=parseInt(document.getElementById('cfg-from').value)||1;
+  cfg.to=parseInt(document.getElementById('cfg-to').value)||200;
+  cfg.digits=parseInt(document.getElementById('cfg-digits').value)||3;
+  cfg.price=parseInt(document.getElementById('cfg-price').value)||20000;
+  var p=document.getElementById('cfg-pin').value.trim();
+  if(p.length>=4)cfg.pin=p;
+  localStorage.setItem('rifaCfg',JSON.stringify(cfg));
+  admUpdateStats(); buildAdmGrid(); updateUrlPreview();
+  var ok=document.getElementById('cfg-ok');ok.style.display='block';
+  setTimeout(function(){ok.style.display='none';},2500);
+}
+function handleImg(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    cfg.imgData=e.target.result;
+    document.getElementById('cfg-img-preview').src=cfg.imgData;
+    document.getElementById('cfg-img-preview').style.display='block';
+    document.getElementById('btn-remove-img').style.display='block';
+    localStorage.setItem('rifaCfg',JSON.stringify(cfg));
+    admUpdateStats();
+  };
+  reader.readAsDataURL(file);
+}
+function removeImg(){
+  cfg.imgData=null;
+  document.getElementById('cfg-img-preview').style.display='none';
+  document.getElementById('btn-remove-img').style.display='none';
+  document.getElementById('img-file').value='';
+  localStorage.setItem('rifaCfg',JSON.stringify(cfg));
+}
+
+/* Modales */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-wrap').forEach(function(m){
+  m.addEventListener('click',function(e){if(e.target===m&&m.id!=='modal-pin')m.classList.remove('open');});
+});
+
+/* Limpiar reservas vencidas */
+function cleanReserved(){
+  var now=Date.now(),changed=false;
+  Object.keys(resMap).forEach(function(n){if(resMap[n].ts&&now-resMap[n].ts>15*60*1000){delete resMap[n];changed=true;}});
+  if(changed)save();
+}
+
+/* INIT */
+init();
+</script>
+</body>
+</html>

@@ -229,6 +229,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <button class="btn btn-gold" onclick="buyerPrintTicket()">🖨️ Imprimir boleto</button>
     <button class="btn-ghost" onclick="buyerShareTicket()">Compartir comprobante</button>
     <button class="btn-ghost" style="margin-top:8px" onclick="buyerBackHome()">Volver al inicio</button>
+    <div id="all-sold-notice" style="display:none" class="ib ib-green" style="margin-top:12px;text-align:center">
+      🎉 <strong>¡Todos los números vendidos!</strong><br>Ya se puede realizar el sorteo.
+    </div>
   </div>
 </div>
 
@@ -309,13 +312,33 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
   <div class="topbar"><h1>🎰 Sorteos</h1></div>
   <div class="scroll">
     <div class="ib ib-blue">Podés realizar <strong>múltiples sorteos</strong>. Cada uno queda guardado en el historial.</div>
+
+    <div class="slbl">Modo de sorteo</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn-sm on" id="dmode-todos" onclick="setDrawMode('todos')">Todos los números</button>
+      <button class="btn-sm" id="dmode-vendidos" onclick="setDrawMode('vendidos')">Solo vendidos</button>
+    </div>
+    <div id="dmode-todos-info" class="ib ib-blue" style="font-size:12px">Sortea entre <strong>todos</strong> los números del rango configurado.</div>
+    <div id="dmode-vendidos-info" class="ib ib-amber" style="font-size:12px;display:none">Sortea solo entre los <strong>números vendidos</strong>. El ganador siempre es un comprador pagado.</div>
+
     <div class="fg"><label class="fl">Nombre del sorteo</label><input class="fi" id="draw-name" placeholder="Ej: 1er Premio, 2do Premio..."></div>
-    <div class="fg"><label class="fl">Número ganador de la Lotería Nacional</label><input class="fi" type="number" id="lot-num" placeholder="Ej: 38472" style="font-size:20px;text-align:center;font-family:'DM Mono',monospace"></div>
-    <button class="btn" onclick="doDrawing()">🎰 Realizar sorteo</button>
+    <div id="lot-wrap">
+      <div class="fg"><label class="fl">Número ganador de la Lotería Nacional</label><input class="fi" type="number" id="lot-num" placeholder="Ej: 38472" style="font-size:20px;text-align:center;font-family:'DM Mono',monospace"></div>
+    </div>
+    <button class="btn" onclick="doDrawing()">🎰 ¡Sortear ahora!</button>
     <div class="sorteo-drum" id="draw-drum" style="display:none">
       <div class="drum-label">Número ganador</div>
       <div class="drum-num" id="drum-disp">—</div>
       <div id="drum-winner" style="margin-top:10px;font-size:14px;color:var(--muted)"></div>
+    </div>
+    <div id="winner-card-wrap" style="display:none">
+      <div style="background:var(--sold-bg);border:2px solid var(--sold-border);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--sold-txt);text-transform:uppercase;letter-spacing:1.5px">🏆 Ganador</div>
+        <div style="font-size:48px;font-weight:800;color:var(--sold-txt);font-family:'DM Mono',monospace;line-height:1;margin:8px 0" id="w-num-big">—</div>
+        <div style="font-size:18px;font-weight:600;color:var(--sold-txt)" id="w-name-big">—</div>
+        <div style="font-size:13px;color:var(--sold-txt);margin-top:4px" id="w-phone-big">—</div>
+        <div style="font-size:12px;color:var(--sold-txt);margin-top:2px" id="w-dni-big">—</div>
+      </div>
     </div>
     <div id="draw-hist-wrap" style="display:none">
       <div class="slbl">Historial</div>
@@ -665,6 +688,10 @@ function buyerDoSuccess(){
   document.getElementById('bok-dni').textContent=buyer.dni;
   document.getElementById('bok-phone').textContent=buyer.phone;
   document.getElementById('bok-amt').textContent=fmtP(cfg.price);
+  var totalNums = cfg.to - cfg.from + 1;
+  var soldCount = Object.keys(soldMap).length;
+  var notice = document.getElementById('all-sold-notice');
+  if(notice) notice.style.display = soldCount >= totalNums ? 'block' : 'none';
   buyerShow('buy-ok');
 }
 function buyerBackHome(){

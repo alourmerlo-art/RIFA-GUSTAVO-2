@@ -168,6 +168,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <div class="num-grid" id="buy-grid"></div>
     <div class="selbar" id="buy-selbar">Tocá un número para seleccionarlo</div>
     <button class="btn" id="buy-btn" style="display:none" onclick="buyerGoCheckout()">Comprar este número →</button>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn-ghost" onclick="buyerShow('bases')" style="flex:1">📋 Bases y condiciones</button>
+      <a href="https://www.instagram.com/ggb_2610" target="_blank" style="flex:1;text-decoration:none"><button class="btn-ghost" style="width:100%">📷 Instagram</button></a>
+    </div>
   </div>
 </div>
 
@@ -321,7 +325,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <div id="dmode-todos-info" class="ib ib-blue" style="font-size:12px">Sortea entre <strong>todos</strong> los números del rango configurado.</div>
     <div id="dmode-vendidos-info" class="ib ib-amber" style="font-size:12px;display:none">Sortea solo entre los <strong>números vendidos</strong>. El ganador siempre es un comprador pagado.</div>
 
-    <div class="fg"><label class="fl">Nombre del sorteo</label><input class="fi" id="draw-name" placeholder="Ej: 1er Premio, 2do Premio..."></div>
+    <div class="slbl">Premio a sortear</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+      <button class="btn-sm" onclick="prevPrize()" style="padding:8px 14px;font-size:16px">◀</button>
+      <div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;font-size:13px;text-align:center;font-weight:500;color:var(--accent)" id="prize-selector">1° Premio</div>
+      <button class="btn-sm" onclick="nextPrize()" style="padding:8px 14px;font-size:16px">▶</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;padding:8px;background:var(--surface2);border-radius:var(--r-sm)" id="prize-desc">Habitación doble 2 noches Hotel Paradiso, Merlo San Luis (Temporada baja)</div>
+    <div class="fg"><label class="fl">Nombre del sorteo (opcional)</label><input class="fi" id="draw-name" placeholder="Se completa automáticamente"></div>
     <div id="lot-wrap">
       <div class="fg"><label class="fl">Número ganador de la Lotería Nacional</label><input class="fi" type="number" id="lot-num" placeholder="Ej: 38472" style="font-size:20px;text-align:center;font-family:'DM Mono',monospace"></div>
     </div>
@@ -496,8 +507,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 <script>
 /* ══════════ ESTADO ══════════ */
 var cfg = JSON.parse(localStorage.getItem('rifaCfg')||'null') || {
-  prize:'Auto 0km Peugeot 208', meta:'Premio $10.000.000 · Sorteo: 20/07/2025',
-  date:'20/07/2025', from:1, to:200, digits:3, price:20000,
+  prize:'Bono Solidario Gustavo Borda', meta:'Más de 24 premios · Sorteo: 26/10/2026',
+  date:'26/10/2026', from:1, to:1500, digits:4, price:10000,
   alias:'GUSBORDA60', cvu:'0270110920017835030014', holder:'Gustavo Gabriel Borda', wa:'5492664301229',
   mpk:'', pin:'1234', url:'', imgData:null
 };
@@ -877,7 +888,7 @@ function buildStats(){
 /* Sorteo */
 function doDrawing(){
   var lot=parseInt(document.getElementById('lot-num').value)||0;
-  var name=document.getElementById('draw-name').value||('Sorteo '+(drawHist.length+1));
+  var name=document.getElementById('draw-name').value||PRIZES[currentPrizeIdx]||('Sorteo '+(drawHist.length+1));
   var total=cfg.to-cfg.from+1;
   var winNum=(lot%total)+cfg.from;
   var drum=document.getElementById('draw-drum');
@@ -1002,5 +1013,71 @@ function cleanReserved(){
 /* INIT */
 init();
 </script>
+
+<!-- ══════ BASES Y CONDICIONES ══════ -->
+<div id="sc-bases" class="screen">
+  <div class="topbar"><span class="back-btn" onclick="buyerShow('buy-home')">← Volver</span><h1>Bases y Condiciones</h1></div>
+  <div class="scroll">
+    <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:var(--r);padding:16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:14px;font-weight:600;color:var(--accent)">🎟️ BONO SOLIDARIO</div>
+      <div style="font-size:18px;font-weight:800;font-family:'Syne',sans-serif;margin:4px 0">Gustavo Borda</div>
+      <div style="font-size:12px;color:var(--muted)">San Luis, Argentina · 2026</div>
+      <div style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5">Con esta rifa colaborás con Gustavo para ayudar a cubrir los gastos de su enfermedad. Participás por más de 24 premios increíbles.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 1 — Organización</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Este BONO SOLIDARIO será ejecutado en forma de sorteo y es organizado a título personal por Gustavo Borda, domiciliado en la provincia de San Luis, República Argentina, con carácter solidario y sin fines de lucro. Los fondos recaudados serán destinados íntegramente a cubrir gastos médicos, tratamientos y necesidades de su grupo familiar, derivados del diagnóstico de Esclerosis Lateral Amiotrófica (ELA) desde el año 2023.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 2 — Números y precio</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Se sugiere un aporte de $10.000 (diez mil pesos argentinos). Cada participante podrá adquirir la cantidad de números que desee. Se disponen 1500 números del 1 al 1500. No se reservarán números sin el pago correspondiente acreditado.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 3 — Forma de pago</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El pago deberá realizarse preferentemente mediante transferencia al alias GUSBORDA60 (Banco Supervielle). Una vez realizada la transferencia, el participante deberá enviar el comprobante de pago por WhatsApp al 2664-301229. El número quedará asignado únicamente una vez confirmado el pago. Se aceptarán pagos en efectivo directamente al beneficiario.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 4 — Fecha del sorteo</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El sorteo se realizará una vez terminada la venta de todos los números. La fecha y hora exacta será anunciada con al menos 72 horas de anticipación a través de la cuenta de Instagram @ggb_2610.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 5 — Mecanismo del sorteo</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El sorteo se realizará en vivo a través de la plataforma MI RIFA APP, en transmisión en directo por Instagram (@ggb_2610), garantizando transparencia y carácter aleatorio del resultado.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 6 — Premios</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Los premios serán presentados públicamente desde el primer día del lanzamiento. No se realizarán cambios ni reemplazos de premios una vez publicados, salvo causa de fuerza mayor debidamente comunicada.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 7 — Entrega de premios</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">La entrega de premios se coordinará dentro de los 15 días corridos posteriores al sorteo. Si el ganador reside fuera de San Luis, los gastos de envío se compartirán en partes iguales (50% ganador / 50% organizador).</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 8 — Identificación del ganador</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El ganador será contactado por WhatsApp dentro de las 48 horas siguientes al sorteo. Deberá responder dentro de los 7 días corridos para reclamar su premio. Si no hay respuesta, se realizará un nuevo sorteo.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 9 — Devoluciones y cancelaciones</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Una vez realizado el pago y asignado el número, no se realizarán devoluciones dado el carácter solidario del bono.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 10 — Transparencia</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El organizador publicará periódicamente en Instagram el estado de ventas. Una vez realizado el sorteo, se publicará la lista completa de ganadores.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 11 — Privacidad</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Los datos personales de los participantes serán utilizados exclusivamente para la gestión del sorteo y no serán compartidos con terceros.</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 12 — Aceptación</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">La participación implica la aceptación plena e incondicional de todas las bases y condiciones. Consultas: Instagram @ggb_2610 o WhatsApp 2664-301229.</div>
+    </div>
+    <div style="text-align:center;padding:16px 0;font-size:13px;color:var(--muted)">
+      📷 <a href="https://www.instagram.com/ggb_2610" style="color:var(--accent)">@ggb_2610</a> · 
+      📱 <a href="https://wa.me/5492664301229" style="color:var(--accent)">WhatsApp 2664-301229</a>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

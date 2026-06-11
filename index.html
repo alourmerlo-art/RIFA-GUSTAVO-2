@@ -169,8 +169,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <div class="selbar" id="buy-selbar">Tocá un número para seleccionarlo</div>
     <button class="btn" id="buy-btn" style="display:none" onclick="buyerGoCheckout()">Comprar este número →</button>
     <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn-ghost" onclick="buyerShow('bases')" style="flex:1">📋 Bases y condiciones</button>
-      <a href="https://www.instagram.com/ggb_2610" target="_blank" style="flex:1;text-decoration:none"><button class="btn-ghost" style="width:100%">📷 Instagram</button></a>
+      <button class="btn-ghost" onclick="buyerShow('premios');buildPremiosList()" style="flex:1">🏆 Ver premios</button>
+      <button class="btn-ghost" onclick="buyerShow('bases')" style="flex:1">📋 Bases</button>
+    </div>
+    <div style="margin-top:8px">
+      <a href="https://www.instagram.com/gus_borda" target="_blank" style="display:block;text-decoration:none"><button class="btn-ghost" style="width:100%">📷 Instagram @gus_borda</button></a>
     </div>
   </div>
 </div>
@@ -571,6 +574,45 @@ function buyerInit(){
   showSc('sc-buy-home');
 }
 function buyerShow(id){showSc('sc-'+id);}
+
+
+function buildPremiosList(){
+  var prizes = [
+    {n:'1°', premio:'Hotel Paradiso — Merlo San Luis', detalle:'Habitación doble · 2 noches · Temporada baja'},
+    {n:'2°', premio:'Cabañas Cinco Soles — Merlo San Luis', detalle:'Fin de semana para 2 personas · Temporada baja · No transferible'},
+    {n:'3°', premio:'Cabañas La Trinidad — Merlo San Luis', detalle:'2 noches para 2 personas con desayuno seco · Temporada baja'},
+    {n:'4°', premio:'Dormus Auditorium Suites — Carlos Paz', detalle:'Alojamiento 2 personas · Septiembre 2026 · Temporada baja'},
+    {n:'5°', premio:'Dormus Auditorium Suites — Carlos Paz', detalle:'Alojamiento 2 personas · Octubre 2026 · Temporada baja'},
+    {n:'6°', premio:'Dormus Auditorium Suites — Carlos Paz', detalle:'Alojamiento 2 personas · Abril 2027 · Temporada baja'},
+    {n:'7°', premio:'Dormus Auditorium Suites — Carlos Paz', detalle:'Alojamiento 2 personas · Mayo 2027 · Temporada baja'},
+    {n:'8°', premio:'Dormus Auditorium Suites — Carlos Paz', detalle:'Alojamiento 2 personas · Junio 2027 · Temporada baja'},
+    {n:'9°', premio:'Pileta', detalle:'2,70 x 1,60 x 0,65 m · Mod. 1043'},
+    {n:'10°', premio:'Taladro recargable 12 Volt', detalle:''},
+    {n:'11°', premio:'Sierra caladora 800 Volt', detalle:''},
+    {n:'12°', premio:'Exprimidora de cítricos Black+Decker', detalle:''},
+    {n:'13°', premio:'2 reels publicitarios', detalle:'Realizados por LUMAR'},
+    {n:'14°', premio:'Espejo sin marco', detalle:'350 x 850 mm'},
+    {n:'15°', premio:'Espejo sin marco', detalle:'600 x 400 mm'},
+    {n:'16°', premio:'Mate + yerbero', detalle:'TODO MATE'},
+    {n:'17°', premio:'Almuerzo para 2 personas', detalle:'Cabeza del Indio · Merlo San Luis'},
+    {n:'18°', premio:'Orden de compra $50.000', detalle:'Súper Carpintería San Luis'},
+    {n:'19°', premio:'Premio Distribuidora Bebidas Nicoletti', detalle:'Merlo San Luis'},
+    {n:'20°', premio:'Un corte con el Barbero', detalle:'Elías Bogado · Merlo San Luis'},
+    {n:'21°', premio:'Voucher para 4 personas', detalle:'Laberinto Cabeza del Indio · Merlo San Luis'},
+    {n:'22°', premio:'Cabañas Paihuen — Merlo San Luis', detalle:'2 noches para 2 personas · Temporada baja'},
+    {n:'23°', premio:'Orden de compra $50.000', detalle:'Óptica El Poeta · Merlo San Luis'},
+    {n:'24°', premio:'4 cortinas roller tela Screen blanco', detalle:'0,90 ancho x 2,10 alto'}
+  ];
+  var html='';
+  prizes.forEach(function(p){
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start">'
+      +'<div style="background:var(--accent);color:#000;border-radius:6px;padding:4px 8px;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;flex-shrink:0">'+p.n+'</div>'
+      +'<div><div style="font-size:14px;font-weight:600;color:var(--text)">'+p.premio+'</div>'
+      +(p.detalle?'<div style="font-size:12px;color:var(--muted);margin-top:2px">'+p.detalle+'</div>':'')
+      +'</div></div>';
+  });
+  document.getElementById('premios-list').innerHTML=html;
+}
 
 function buildBuyerGrid(){
   var g=document.getElementById('buy-grid');
@@ -1038,11 +1080,11 @@ init();
     </div>
     <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
       <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 4 — Fecha del sorteo</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.6">El sorteo se realizará una vez terminada la venta de todos los números. La fecha y hora exacta será anunciada con al menos 72 horas de anticipación a través de la cuenta de Instagram @ggb_2610.</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El sorteo se realizará una vez terminada la venta de todos los números. La fecha y hora exacta será anunciada con al menos 72 horas de anticipación a través de la cuenta de Instagram @gus_borda.</div>
     </div>
     <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
       <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 5 — Mecanismo del sorteo</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.6">El sorteo se realizará en vivo a través de la plataforma MI RIFA APP, en transmisión en directo por Instagram (@ggb_2610), garantizando transparencia y carácter aleatorio del resultado.</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">El sorteo se realizará en vivo a través de la plataforma MI RIFA APP, en transmisión en directo por Instagram (@gus_borda), garantizando transparencia y carácter aleatorio del resultado.</div>
     </div>
     <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
       <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 6 — Premios</div>
@@ -1070,12 +1112,25 @@ init();
     </div>
     <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;margin-bottom:8px;background:var(--surface)">
       <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Art. 12 — Aceptación</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.6">La participación implica la aceptación plena e incondicional de todas las bases y condiciones. Consultas: Instagram @ggb_2610 o WhatsApp 2664-301229.</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">La participación implica la aceptación plena e incondicional de todas las bases y condiciones. Consultas: Instagram @gus_borda o WhatsApp 2664-301229.</div>
     </div>
     <div style="text-align:center;padding:16px 0;font-size:13px;color:var(--muted)">
-      📷 <a href="https://www.instagram.com/ggb_2610" style="color:var(--accent)">@ggb_2610</a> · 
+      📷 <a href="https://www.instagram.com/gus_borda" style="color:var(--accent)">@gus_borda</a> · 
       📱 <a href="https://wa.me/5492664301229" style="color:var(--accent)">WhatsApp 2664-301229</a>
     </div>
+  </div>
+</div>
+
+
+<!-- ══════ PREMIOS ══════ -->
+<div id="sc-premios" class="screen">
+  <div class="topbar"><span class="back-btn" onclick="buyerShow('buy-home')">← Volver</span><h1>🏆 Premios</h1></div>
+  <div class="scroll">
+    <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:var(--r);padding:14px;margin-bottom:12px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800">24 Premios</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Bono Solidario Gustavo Borda · Sorteo 26/10/2026</div>
+    </div>
+    <div id="premios-list"></div>
   </div>
 </div>
 
